@@ -4,6 +4,8 @@
 
 #include "system.h"
 
+template <class T> class List;
+
 template <class T>
 class ListElement {
 private:

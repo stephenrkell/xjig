@@ -4,6 +4,8 @@
 
 #include "system.h"
 
+template <class T> class Fifo;
+
 template <class T>
 class FifoElement {
 private:

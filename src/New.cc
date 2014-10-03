@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 MemRecord mem_records[NUM_OF_MEM_RECORDS];
-char *mem_error_file, *mem_error_pointer, *mem_error_thing = "";
+const char *mem_error_file, *mem_error_pointer, *mem_error_thing = "";
 int mem_error_line = 0;
 
 MemRecord::MemRecord() {
@@ -42,13 +42,8 @@ void OutOfMem() {
   DumpMem();
 };
 
-void AddMemRef(void *pointer, char *file, int line) {
+void AddMemRef(void *pointer, const char *file, int line) {
   int i;
-
-  if (!mem_records) {
-    fprintf(stderr, "mem_records is NULL\n");
-    exit(1);
-  };
 
   for (i = 0; i < NUM_OF_MEM_RECORDS; i++) {
     if (!mem_records[i].pointer) {
@@ -62,7 +57,7 @@ void AddMemRef(void *pointer, char *file, int line) {
   DumpMem();
 };
 
-void RemoveMemRef(void *pointer, char *file, int line) {
+void RemoveMemRef(void *pointer, const char *file, int line) {
   int i;
 
   for (i = 0; i < NUM_OF_MEM_RECORDS; i++) {

@@ -7,21 +7,20 @@
 #ifndef _New_H
 #define _New_H
 
-// new.h is in /usr/psup/gcc-2.6.0/lib/g++-include/
-#include <new.h>
+#include <new>
 
 class MemRecord {
 public:
   MemRecord();
   void *pointer;
-  char *file;
+  const char *file;
   int line;
 };
 
 #define NUM_OF_MEM_RECORDS 3000
 
 extern MemRecord mem_records[];
-extern char *mem_error_file, *mem_error_pointer, *mem_error_thing;
+extern const char *mem_error_file, *mem_error_pointer, *mem_error_thing;
 extern int mem_error_line;
 
 #ifdef MEM_DEBUG
@@ -43,7 +42,7 @@ extern int mem_error_line;
    delete [] pointer
 
 #define INIT_New \
-   set_new_handler(OutOfMem)
+   std::set_new_handler(OutOfMem)
 
 #else
 
@@ -62,8 +61,8 @@ extern int mem_error_line;
 
 void DumpMem();
 void OutOfMem();
-void AddMemRef(void *pointer, char *file, int line);
-void RemoveMemRef(void *pointer, char *file, int line);
+void AddMemRef(void *pointer, const char *file, int line);
+void RemoveMemRef(void *pointer, const char *file, int line);
 
 #endif
 

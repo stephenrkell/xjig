@@ -5,6 +5,17 @@
 #include "socket.h"
 
 const UINT32 MAX_MESSAGE_SIZE = 3000000;
+class Message;
+
+inline void ResetByteOrder();
+void SetByteOrder(UINT8 code);
+void Check_Byte_Order();
+const char *ByteOrder();  // Returns "MSB First", "LSB First" or "Undefined"
+UINT16 GetUINT16(Message const &msg, UINT32 index);
+UINT32 GetUINT32(Message const &msg, UINT32 index);
+void PutUINT8(Message &msg, UINT32 index, UINT8 value);
+void PutUINT16(Message &msg, UINT32 index, UINT16 value);
+void PutUINT32(Message &msg, UINT32 index, UINT32 value);
 
 class Message {
 public:
@@ -30,10 +41,10 @@ protected:
   UINT32 size;
   UINT32 max_size;
   int size_lock;
-  friend void ResetByteOrder() { Message::byte_order = -1; };
+  friend void ResetByteOrder();
   friend void SetByteOrder(UINT8 code);
   friend void Check_Byte_Order();
-  friend char *ByteOrder();  // Returns "MSB First", "LSB First" or "Undefined"
+  friend const char *ByteOrder();  // Returns "MSB First", "LSB First" or "Undefined"
   friend UINT16 GetUINT16(Message const &msg, UINT32 index);
   friend UINT32 GetUINT32(Message const &msg, UINT32 index);
   friend void PutUINT8(Message &msg, UINT32 index, UINT8 value);
@@ -45,6 +56,6 @@ protected:
   Message(Message const&msg) {fprintf(stderr, "Message(Message)\n"); exit(1);};
 };
 
-
+inline void ResetByteOrder() { Message::byte_order = -1; }
 
 #endif

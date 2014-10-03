@@ -177,7 +177,7 @@ Event::Event(EventContext &ec, UINT32 seq_num, UINT32 start, UINT32 stop) {
   if (!stop) stop = MAX_UINT32;
 
   ec.motion_buffer->Rewind();
-  while (motion = ec.motion_buffer->Next()) {
+  while (0 != (motion = ec.motion_buffer->Next())) {
     if (motion->Time() >= start && motion->Time() <= stop) {
       count++;
     };
@@ -194,7 +194,7 @@ Event::Event(EventContext &ec, UINT32 seq_num, UINT32 start, UINT32 stop) {
 
   count = 0;
   ec.motion_buffer->Rewind();
-  while (motion = ec.motion_buffer->Next()) {
+  while (0 != (motion = ec.motion_buffer->Next())) {
     if (motion->Time() >= start && motion->Time() <= stop) {
       PutUINT32(*this, 32 + count * 8, motion->Time());
       PutUINT16(*this, 32 + count * 8 + 4, motion->X());

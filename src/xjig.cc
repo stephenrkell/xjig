@@ -47,7 +47,7 @@ List<UINT32> orphan_windows;
 
 // *** FileExists(filename) returns 1 if <filename> exists, otherwise 0
 
-int FileExists(char *filename) {
+int FileExists(const char *filename) {
   int f;
 
   f = open(filename, O_RDONLY);
@@ -62,13 +62,13 @@ int FileExists(char *filename) {
   return 1;
 };
 
-void Brief(char *s) {
+void Brief(const char *s) {
   if (message_detail >= Brief_Detail) {
     printf("%s", s);
   };
 };
 
-void Min(char *s) {
+void Min(const char *s) {
   if (message_detail >= Min_Detail) {
     printf("%s", s);
   };
@@ -203,7 +203,7 @@ void AddOrphanWindow(UINT32 wid) {
   orphan_windows.Append(temp);
 };
 
-void Snoop_X_Message(Message &msg) {
+void Snoop_X_Message(const Message &msg) {
   UINT32 i;
 
   X_message_count++;
@@ -484,12 +484,13 @@ void Snoop_PROG_Message(Message &msg) {
       Brief("Open Font\n");
       break;
 
-    case 38:
+    case 38: {
       Brief("QueryPointer\n");
       // *** Create message containing response to QueryPointer ***
-      SendMessage(Event(event_context,
+      Event tmpEvent(event_context,
 			PROG_message_count - 1   // sequence number
-                        ),
+                        );
+      SendMessage(tmpEvent,
 		  No_Mod,
 		  PROG);
       // *** Change PROG message into NoOperation to   ***
@@ -497,16 +498,17 @@ void Snoop_PROG_Message(Message &msg) {
       PutUINT8(msg, 0, 127);
       PutUINT16(msg, 2, 1);
       msg.SetSize(4);
-      break;
+    } break;
 
-    case 39:
+    case 39: {
       Brief("GetMotionEvents");
       // *** Create message containing response to GetMotionEvents ***
-      SendMessage(Event(event_context,
+      Event tmpEvent(event_context,
 			 PROG_message_count - 1, // sequence number
 			 GetUINT32(msg, 8),      // start time
 			 GetUINT32(msg, 12)      // stop time
-			 ),
+			 );
+      SendMessage(tmpEvent,
 		  No_Mod,
 		  PROG);
       // *** Change PROG message into NoOperation to   ***
@@ -514,7 +516,7 @@ void Snoop_PROG_Message(Message &msg) {
       PutUINT8(msg, 0, 127);
       PutUINT16(msg, 2, 1);
       msg.SetSize(4);
-      break;
+    } break;
 
     case 55:
       Brief("CreateGC\n");
@@ -637,7 +639,7 @@ int main(int argc, char *argv[]) {
   int arg;
   Message msg;
 
-  Message *last_msg[128];
+  Message *last_msg[128] __attribute__((unused));
   int i;
   for (i = 0; i <= 127; i++) {
     last_msg[i] = 0;
@@ -779,7 +781,7 @@ int main(int argc, char *argv[]) {
   UINT32 X_packet_count = 0;
   UINT32 PROG_packet_count = 0;
   UINT32 size;
-  int index;
+  //int index;
   UINT32 temp_count;
   UINT32 skip_break = 0;
   timeval zero_time;
@@ -1061,7 +1063,7 @@ int main(int argc, char *argv[]) {
 	  // *** If it can't be cracked, just send whole packet ***
 	  //if (PROG_message_count > 0) {
 	    temp_count = PROG_message_count;
-	    for (index = 0; index + 1 <= msg.Size() && skip_break == 0;
+	    for (unsigned index = 0u; index + 1u <= msg.Size() && skip_break == 0;
 			    index += size) {
 	      if ((msg[index] == 'B' || msg[index] == 'l')
 		  && PROG_message_count == 0 && index == 0) {
@@ -1113,7 +1115,7 @@ int main(int argc, char *argv[]) {
 	  msg.Send(*X);
 	  PROG_message_count++;
 	} else {
-	  for (index = 0; index + 1 <= msg.Size(); index += size) {
+	  for (unsigned index = 0u; index + 1u <= msg.Size(); index += size) {
 	    
 	    if ((msg[index] == 'B' || msg[index] == 'l')
 		&& PROG_message_count == 0 && index == 0) {
@@ -1243,7 +1245,7 @@ int main(int argc, char *argv[]) {
 	  // *** Prescan packet and see if it parses correctly ***
 	  // *** If it can't be cracked, just send whole packet ***
 	  temp_count = X_message_count;
-	  for (index = 0; index + 1 <= msg.Size() && skip_break == 0;
+	  for (unsigned index = 0u; index + 1u <= msg.Size() && skip_break == 0;
 			  index += size) {
 	    size = XSubLength(msg, index);
 	    if (size == 0) {
@@ -1276,7 +1278,7 @@ int main(int argc, char *argv[]) {
 	msg.Send(*PROG);
 	X_message_count++;
       } else {
-	for (index = 0; index + 1 <= msg.Size(); index += size) {
+	for (unsigned index = 0u; index + 1u <= msg.Size(); index += size) {
 	  size = XSubLength(msg, index);
 	  
 	  if (message_detail >= Brief_Detail) {

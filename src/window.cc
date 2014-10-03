@@ -136,7 +136,7 @@ Window *Window::FindWindow(UINT32 wid, Window *win) {
 
   win->children.Rewind();
   while (win->children.Next()) {
-    if (temp = FindWindow(wid, win->children.Current())) {
+    if (0 != (temp = FindWindow(wid, win->children.Current()))) {
       return temp;
     };
   };

@@ -135,14 +135,14 @@ int Message::Receive(Socket const &from) {
 //	 (unsigned int)max_size);
 
   size = recv(from.Handle(), (char *)data, max_size, 0);
-  if (size == -1) {
+  if (size == -1u) {
     if (errno == ECONNRESET) {
       return -1;
     };
     fprintf(stderr, "Error %i on recv()\n", errno);
     terminate();
   };
-  if (size >= max_size - 2) {
+  if (size >= max_size - 2u) {
     fprintf(stderr, "Message buffer overflow, size = %u, max_size = %u\n",
 	    (unsigned int)size,
 	    (unsigned int)max_size);
@@ -217,7 +217,7 @@ void Check_Byte_Order() {
   };
 };
 
-char *ByteOrder() {
+const char *ByteOrder() {
 
   switch (Message::byte_order) {
   case 0:

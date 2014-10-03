@@ -12,7 +12,7 @@ Socket::Socket(char *host_name, int port_number) {
     terminate();
   };
 
-  if (hp->h_length > sizeof(in_addr)) {
+  if ((size_t) hp->h_length > sizeof(in_addr)) {
     printf("Host address is too large\n");
     terminate();
   };
@@ -89,7 +89,7 @@ Socket::Socket(Socket const &s) {
   // *** Accept a connect ***
   
   bcopy((char *)&s.address, (char *)&address, sizeof(address));
-  int addr_size = sizeof(address);
+  unsigned addr_size = sizeof(address);
   
   handle = accept(s.handle, (sockaddr *)&address, &addr_size);
   if (handle == -1) {

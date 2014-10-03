@@ -47,7 +47,7 @@ private:
     fprintf(stderr, "EventContext(EventContext) does not exist\n");
     exit(1);
   };
-  MotionNotify();
+  int MotionNotify();
   UINT8 key_mask[256];
   UINT16 mask;
 

@@ -93,7 +93,7 @@ extern int select (int __width, fd_set * __readfds,
 		   struct timeval * __timeout);
 #endif
 
-#ifndef HPUX
+#if !defined(HPUX) && !defined(__linux__)
 int setsockopt(int s, int leve, int optname, char *optval, int optlen);
 extern int bind (int __sockfd, struct sockaddr *__my_addr,
 		 int __addrlen);
@@ -104,18 +104,23 @@ extern int connect(int s, struct sockaddr *name, int namelen);
 extern int accept(int s, struct sockaddr *addr, int *addrlen);
 #endif
 
+extern int close(int fd);
+extern int listen(int s, int backlog);
+
+#if !defined(__linux__)
 extern void bzero(char *b, int length);
 extern void bcopy(char *b1, char *b2, int len);
-extern int close(int fd);
 
 extern int ftime(timeb *tp);
-extern int listen(int s, int backlog);
 
 extern int getrlimit(int resource, struct rlimit *rlp);
 extern int inet_addr(char *cp);
 extern int gethostname(char *name, int namelen);
+#else
+#include <unistd.h>
+#endif
 };
 
-#include "new.h"
+#include <new>
 
 #endif
