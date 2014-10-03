@@ -1,0 +1,20 @@
+
+Xjig was written by Jeff Steidl and Vivekananda Maganty.
+
+To compile xjig:
+   1) Change the first -D (define) for the CFLAGS to be the
+      desired architecture.  Xjig knows about the following
+      architectures:
+         SunOS
+         DEC
+         HPUX
+      The only difference in compilation for the different
+      architectures is the location of .h files and the
+      need (or lack thereof) to predeclare library functions.
+      If you wish to compile xjig for a different system,
+      you will probably need to modify the file "system.h".
+      (Note:  xjig has not actually been tested on HPUX yet.
+       Last time it was checked, it did not work.  However,
+       a bug-fix was introduced to get the DEC version working
+       which may have also fixed the HPUX problem.)
+   2) Use make.

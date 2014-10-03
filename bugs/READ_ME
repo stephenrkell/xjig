@@ -1,0 +1,7 @@
+
+params: Text file containing some of the parameters used to obtain
+        crashes/hangs for various programs.
+
+types:  Text file listing types of testing used to obtain several
+        crashes/hangs.  (This list is more inclusive, but perhaps
+        less informative than the above list.)

@@ -1,0 +1,37 @@
+This file describes the types of testing used to obtain crashes/hangs
+for several X-Window applications.
+
+The types of testing used are:
+
+1. Random messages
+2. Mangling/Garbling of messages
+3. Random Events
+4. Legal Events
+
+ - commas seperate seperate crashes or hangs
+
+ - adjacent numbers represent multiple techniques to achieve a single
+   crash or hang
+
+ - a preceding X means that it was aimed at the X server (all others
+   were aimed at the client, note that a preceding X applies only
+   to the digit immediately following it)
+
+Application   Crash   Hang
+-----------   -----   ----
+bitmap        4,234
+emacs         24      X134
+idraw                 4
+Mosaic                4
+netscape      4
+rxvt                  4
+xclipboard            4
+xdvi                  234
+xfig                  24
+xgdb                  4
+xpaint        34      X1X212
+xpostit               4
+xspread               34
+xtv                   4
+xv                    24
+xweather      4

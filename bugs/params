@@ -1,0 +1,23 @@
+
+This table contains command lines used to obtain various crashes/hangs.
+Not all crashes/hangs listed in the "types" file are listed here, since
+for some crashes/hangs the type(s) of testing used was recorded, but the
+actual command line was not.
+
+program    result      command line
+--------   ---------   ---------------------------------
+bitmap     core dump   xjig 6001 -x128 -p64 -h99999 -s4247 -w50
+           core dump   xjig 6001 -p97 -s8743 -w30 -h999999 -c70
+emacs      hang        xjig 6001 -x16 -p192 -s19772 -w220 -h9999
+idraw      hang        xjig 6001 -w200 -d1 -p64
+netscape   core dump   xjig 6002 -p64 -d2 -w650
+rxvt       hang        xjig 6001 -w200 -d1 -p64
+xclipboard hang        xjig 6001 -x128 -p64 -h99999 -s4247 -w50
+xpaint     hang        xjig 6001 -x31 -p31 -d1 -h10000 -c50
+           core dump   xjig 6001 -p192 -s1 -h99999 -w350
+xspim      bad exit    xjig 6001 -w200 -d1 -p64
+xspread    hang        xjig 6001 -w200 -d1 -p192
+xtv        hang        xjig 6001 -w200 -d1 -p64
+xxgdb      hang        xjig 6001 -x128 -p64 -h99999 -s4247 -w50
+xweather   bad exit    xjig 6001 -w200 -d1 -p64 -s321
+           core dump   xjig 6001 -p64 -w100

@@ -1,0 +1,7 @@
+Xjig is a tool for testing X-Window applications and X-Window servers.
+
+The following is a description of files in this directory:
+
+        bugs: Directory containing information about bugs found by xjig.
+         src: Directory containing xjig source code.
+xjig.man.txt: Text file containing instructions for the use of xjig.

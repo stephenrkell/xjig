@@ -1,0 +1,255 @@
+
+Before running xjig, a few steps must be completed:
+
+   1) Have two xterms open.  The first will be used to run xjig, the
+      second to run X-Window applications.
+   2) From the first xterm, disable X-Window authorization with the
+      command "xhost +".
+   3) From the second xterm, set the DISPLAY environment variable
+      to indicate which port number you will give to xjig.  For
+      example if you are going to use port 6017 on machine ABC,
+      you should use the command "setenv DISPLAY ABC:17".  The
+      port number (6017) would then be the first paramenter passed
+      to xjig.
+
+Following is a detailed description of the syntax and symantics of xjig:
+
+This is the syntax returned by xjig if executed with invalid syntax
+(such as typing xjig without any parameters):
+
+Syntax:  xjig <port number> [-x MOD] [-p MOD] [-s seed] [-w wait count]
+         [-d DTL] [-m min_delay] [-t max_run_time] [-h hang_time]
+         [-c mod chance] [-u smart_win_on]
+
+   MOD    Type of modification
+  -----   --------------------
+    1     Flip single bits
+    2     Inc/dec single bytes
+    4     Change single bytes
+    8     Change stretch of bytes
+   16     Append bytes
+   32     Insert well-formed events
+   64     Insert legal events
+  128     Insert bogus events
+  256     Force packet cracking
+
+   DTL    Level of detail
+  -----   --------------------
+    0     None (only fatal errors)
+    1     Minimum
+    2     Each Packet
+    3     Brief
+    4     Full
+
+
+**********************************************************************
+                  Brief summary of all parameters
+**********************************************************************
+
+Parameter: <port number>
+Default value: None (although 6001 is usually used)
+Program variable: program_port
+Desc: This controls the port number with which xjig attempts to
+      connect with the client program (the program being tested).
+
+Parameter: -x
+Default value: 0
+Program variable: X_mod
+Desc: This controls the mangling and insertion of messages from
+      the client program to the X server.  This number is formed
+      by logically oring all of the types of message modification
+      desired.  Note that values 32 (well formed events) and
+      64 (legal events) are not allowed (the program will give
+      an error message and quit).  This is because we felt that
+      these type of events sent to the X server would be no more
+      successful at causing crashes/hangs than random messages (since
+      events would appear as random messages to the X server anyways,
+      since under normal conditions events are only sent to the client).
+      Also note that 128 (bogus events) should for the same reason
+      also not be used with -x (the code for -x was written before
+      option 128 was added, and the -x code parameter checking code
+      was not updated to reflect this; option -x128 is ignored in the
+      actual message modification/insertion code).  The method for sending
+      random messages to the X server is option 16 (append bytes) which will
+      effectively piggy-back random messages after real messages.
+      A detailed description of the modification parameter appears in a
+      section below.
+
+Parameter: -p
+Default value: 0
+Program variable: PROG_mod
+Desc: This controls the mangling and insertion of messages from
+      the client program to the X server.  This number is formed
+      by logically oring all of the types of message modification
+      desired.  A detailed description of the modification parameter
+      appears in a section below.
+
+Parameter: -s
+Default value: 12345678
+Program variable: None (srand() is called immediately with the parameter)
+Desc: Sets the random number seed.
+
+Parameter: -w
+Default value: 0
+Program variable: wait_count
+Desc: Deffers all message modification and insertion (except packet cracking
+      - which theoretically does not change the content of the messages, but
+      only splits them up into individual messages) until after the specified
+      number of packets has been passed through xjig.  This packet count
+      includes both packets from the X server to the client, and from the
+      client to the X server.  For example, a value of 10 would result in the
+      messages in the first 10 packets being transmited without modification.
+
+Parameter: -d
+Default value: 3
+Program variable: message_detail
+Desc: The levels correspond roughly to the following:
+   Value   Level of detail
+   -----   --------------------------------
+     0     None: fatal errors and the initial connection messages
+     1     Minimum: warnings including size zero messages, and message that do
+           not seem to parse according to the X protocol; socket closing and
+           reconnection messages
+     2     Each Packet: size and count of each packet
+     3     Brief: message code, length, and sequence number of each message;
+           some messages are decoded further giving message name; connections
+           opening/closing notifications are given; message modification and
+           insertion along with the type and direction of modification are
+           given; key/button press/release and motion/enter notify (including
+           ones created by xjig) are noted
+     4     Full: parameters of several messages are displayed; message codes
+           and sizes are given during prescan (which is when xjig does a
+           first pass parsing of a packet to determine if it will be able
+           to successfully crack it into individual messages)
+
+Parameter: -m
+Default value: 0
+Program variable: min_delay
+Desc: The minimum time delay (in milliseconds) between inserted events
+      (modification options 32, 64 and 128).
+
+Parameter: -t
+Default value: 0x70000000
+Program variable: max_time
+Desc: The time (in seconds) after which xjig should end the test.  This feature
+      was not used during our testing.  Its intended purpose was to help
+      automate the process of testing X programs by having a script file be
+      able to limit the amount of time xjig tested a program.  Due to reasons
+      outlined in our paper however, fully automated testing was never
+      achieved.
+
+Parameter: -h
+Default value: 5*60
+Program variable: hang_time
+Desc: xjig monitors the time interval between packets from the client program
+      to the X server.  If no packets are seen in <hang_time> seconds, xjig
+      declares the program to have hung.  This feature was not used in our
+      testing, since this is not at all an accurate determination of whether
+      or not a program has hung.  The reasons it is not accurate are that (a)
+      the program may be of a type that only monitors X event messages and
+      never sends messages to the X server other than the initial startup
+      messages, and (b) xjig may not be generation the kinds of events
+      necessary to stimulate the program into any kind of reaction.
+      This feature was disabled by setting the the hang time to a large number
+      (typically 999999 - i.e. 11+ days).
+
+Parameter: -c
+Default value: 50
+Program variable: random_chance
+Desc:  This controls the probability of a message being modified or inserted.
+       Its meaning is approximately how many messages out of every 10,000
+       should be modified.  For insertions it controls how many times out
+       of eery 10,000 times the message queue is polled that a message should
+       be inserted (polling is continuous and unconstrained).
+
+Parameter: -u
+Default value: 0
+Program variable: smart_win_on
+Desc: xjig normally builds a tree structure representing the client programs
+      window hierarchy by monitoring CreateWindow messages.  However, when
+      xjig is unable to parse client program packets (which seemingly do
+      not correspond to the X protocol), it may miss CreateWindow messages.
+      When xjig creates events, it uses its knowledge of the client programs
+      windows to fill in certain message fields and direct the event to the
+      selected client window.  If xjig does not know about a window, it can
+      not exercise the code controlling that window.  For some programs, this
+      meant that xjig was unable to test a large proportion of the code.
+      Turning the smart windows feature on tells xjig to monitor messages
+      other than CreateWindow to dectect the presence of client windows (in
+      fact, xjig will attempt to monitor every type of message from the client
+      to the X server that contains a window ID).  Whenever a window ID is
+      found the xjig has not yet seen, it will assume that it is a valid
+      window ID, and further generated events will have some probability of
+      being sent to this window.
+
+**********************************************************************
+                  Detailed summary of MOD parameter
+**********************************************************************
+
+This is a detailed meaning of MOD (type of modification):
+
+Value: 1
+Short Desc: Flip single bits
+Long Desc:  xjig will pick a random bit in the message and invert it
+
+Value: 2
+Short Desc: Inc/dec single bytes
+Long Desc: xjig will pick a random byte in the message and increment or
+           decrement it (Note: Because this accomplished by subtracting
+           one and then adding a random number 0 through 2, xjig may
+           say it is incrementing/decrementing a byte and subsequently
+           not change the message at all.  This should be changed to
+           subtract one and the add a random number 0 through 1 times
+           two!)
+
+Value: 4
+Short Desc: Change single bytes
+Long Desc: xjig will pick a random byte in the message and change it
+           to a random value
+
+Value: 8
+Short Desc: Change stretch of bytes
+Long Desc: xjig will pick an random range of bytes in the message and
+           change them each to a random number (different calls to
+           the random routine for each byte changed).
+
+Value: 16
+Short Desc: Append bytes
+Long Desc: xjig will append between 1 and 128 random bytes to the end
+           of the message
+
+Value: 32
+Short Desc: Insert well-formed events
+Long Desc: well formed events are the correct size (32 bytes long) and
+           have a message code valid for events (i.e. the first byte
+           is set to a value between 2 and 34).  All other bytes are
+           random.
+
+Value: 64
+Short Desc: Insert legal events
+Long Desc: xjig attempts to create completely legal X events.  This
+           includes honoring window event masks, sequence numbers,
+           time stamps, key/button ordering, parent/root windows, and
+           x/y coordinates.  Note that it is not always possible to
+           do this when CreateWindow or ChangeWindowAttributes messages
+           have not been seen (due to certain packets being uncrackable).
+           In these cases xjig will create events that have as many legal
+           fields as possible.
+           Propogation masks are not honored.  (Since xjig might have
+           randomly picked in the first place the window to which the event
+           eventually propogates, there is no illegality in sending the
+           event to that window.)
+
+Value: 128
+Short Desc: Insert bogus events
+Long Desc: Bogus events are of random size (between 1 and 1024 bytes) and
+           of completely random content.
+
+Value: 256
+Short Desc: Force packet cracking
+Long Desc: If xjig is not asked to create legal events, it does not need
+           to look at the content of individual messages and thus does not
+           need to and does not crack packets.  This option forces xjig to
+           crack the packets into individual messages even when it does not
+           need to do so.
+
