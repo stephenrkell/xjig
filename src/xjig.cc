@@ -1159,7 +1159,7 @@ int main(int argc, char *argv[]) {
 	    };
 	    
 	    if (index + size > msg.Size()) {
-	      fprintf(stderr, "Uncrackable packet recieved from PROG\n");
+	      fprintf(stderr, "Uncrackable packet received from PROG\n");
 	      fprintf(stderr, "Byte order: %s\n", ByteOrder());
 	      msg.Dump();
 	      
@@ -1314,7 +1314,7 @@ int main(int argc, char *argv[]) {
 	  };
 
 	  if (index + size > msg.Size()) {
-	    fprintf(stderr, "Uncrackable packet recieved from X\n");
+	    fprintf(stderr, "Uncrackable packet received from X\n");
 	    fprintf(stderr, "Byte order: %s\n", ByteOrder());
 	    msg.Dump();
 	    {
@@ -1348,7 +1348,7 @@ int main(int argc, char *argv[]) {
 	};
       };
     } else {
-      fprintf(stderr, "Message recieved from unknown connection\n");
+      fprintf(stderr, "Message received from unknown connection\n");
       terminate();
     };
   };
