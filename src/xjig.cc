@@ -583,9 +583,9 @@ UINT32 XSubLength(Message const &msg, UINT32 index) {
   } else if (X_message_count == 0) {
     size = (UINT32)GetUINT16(msg, index + 6) * 4 + 8;
     min_size = 8;
-//    printf("Calculated size = %u, Actual size = %u\n",
-//	   (unsigned int)size,
-//	   (unsigned int)msg.Size());
+    printf("Calculated size = %u, Actual size = %u\n",
+	   (unsigned int)size,
+	   (unsigned int)msg.Size());
   } else if (msg[index] == 1) {
     size = GetUINT32(msg, index + 4) * 4 + 32;
     min_size = 8;
@@ -650,7 +650,10 @@ int main(int argc, char *argv[]) {
   };
   
   char *host_name;
-  char * x_host_name;
+  char *x_host_name;
+  char *x_display_var;
+  int x_display_number;
+  int x_display_port = 6000;
 
   New(host_name, char[100]);
 
@@ -663,9 +666,31 @@ int main(int argc, char *argv[]) {
     terminate();
   };
   x_host_name = host_name;
+  if (NULL != (x_display_var = getenv("DISPLAY"))) {
+    char *display_val = strdup(x_display_var);
+    assert(display_val);
+    /* Null out the colon onwards. */
+    char *colon = strchr(display_val, ':');
+    if (!colon) {
+      fprintf(stderr, "bad DISPLAY variable: %s\n", display_val);
+      free(display_val);
+      terminate();
+    }
+    char *dot = strchr(colon + 1, '.');
+    if (!dot) {
+      /* It's okay to lack the dot. */
+      dot = display_val + strlen(display_val);
+      assert(*dot == '\0');
+    } else {
+      *dot = '\0';
+    }
+    x_display_number = atoi(colon + 1);
+    x_display_port = 6000 + x_display_number;
+    free(display_val);
+  }
 
   int program_port = atoi(argv[1]);
-  if (program_port < 6001 || program_port > 6999) {
+  if (program_port == x_display_port || program_port < 6000 || program_port > 6999) {
     fprintf(stderr, "Bad port number\n");
     terminate();
   };
@@ -746,7 +771,7 @@ int main(int argc, char *argv[]) {
     
   Brief("Connecting X\n");
   
-  New(X, Socket(x_host_name, 6000));
+  New(X, Socket(x_host_name, x_display_port));
 
   if (!X) {
     fprintf(stderr, "Socket X not allocated\n");
@@ -1190,7 +1215,7 @@ int main(int argc, char *argv[]) {
 	X = 0;
 	
 	Min("Reconnecting to X\n");
-	New(X, Socket(x_host_name, 6000));
+	New(X, Socket(x_host_name, x_display_port));
 	if (!X) {
 	  fprintf(stderr, "Socket X not allocated (in loop)\n");
 	  terminate();
@@ -1282,7 +1307,8 @@ int main(int argc, char *argv[]) {
 	  size = XSubLength(msg, index);
 	  
 	  if (message_detail >= Brief_Detail) {
-	    printf("  Message code: %u, size %u\n",
+	    printf("  Message code (index %u): %u, size %u\n",
+	      	   (unsigned int)index,
 		   (unsigned int)msg[index],
 		   (unsigned int)size);
 	  };

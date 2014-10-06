@@ -23,7 +23,7 @@ install: all
 clean:
 	$(RM) $(XJIG) $(OBJS)
 
-xjig.o: system.h socket.h message.h xjig.h event.h New.h window.h List.h List.cc
+xjig.o: system.h socket.h message.h xjig.h event.h New.h window.h List.h xjig.cc
 	$(CXX) $(CXXFLAGS) -c xjig.cc -o xjig.o
 
 socket.o: system.h socket.h New.h socket.cc
