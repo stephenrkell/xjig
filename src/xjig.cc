@@ -27,7 +27,7 @@ static Socket *PROG = 0;
 static int connect_request_flag = 0;
 
 enum MessageDetail {No_Detail = 0, Min_Detail = 1, Packet_Detail = 2,
-		    Brief_Detail = 3, Full_Detail = 4};
+		    Brief_Detail = 3, Full_Detail = 4, Full_With_Dump_Detail = 5};
 static MessageDetail message_detail;
 
 static EventContext event_context;
@@ -332,6 +332,7 @@ void Snoop_PROG_Message(Message &msg) {
 	   (unsigned int)PROG_message_count - 1,
 	   (unsigned int)msg[0],
 	   (unsigned int)msg.Size());
+    if (message_detail >= Full_With_Dump_Detail) msg.Dump();
   };
 
   int i;
@@ -626,6 +627,7 @@ void syntax() {
   fprintf(stderr, "    2     Each Packet\n");
   fprintf(stderr, "    3     Brief\n");
   fprintf(stderr, "    4     Full\n");
+  fprintf(stderr, "    5     Full with raw protocol dump\n");
 
   terminate();
 };
@@ -654,6 +656,12 @@ int main(int argc, char *argv[]) {
   char *x_display_var;
   int x_display_number;
   int x_display_port = 6000;
+  
+  const char *dump_var = getenv("XJIG_DUMP_PROTO");
+  if (dump_var && atoi(dump_var) != 0)
+  {
+    message_detail = Full_With_Dump_Detail;
+  }
 
   New(host_name, char[100]);
 
@@ -1077,6 +1085,7 @@ int main(int argc, char *argv[]) {
 	printf("Packet %u from PROG of size %u\n",
 	       (unsigned int)PROG_packet_count - 1,
 	       (unsigned int)msg.Size());
+	if (message_detail >= Full_With_Dump_Detail) msg.Dump();
       };
 
       if (msg.Size() > 0) {
@@ -1261,6 +1270,7 @@ int main(int argc, char *argv[]) {
 	printf("Packet %u from X of size %u\n",
 	       (unsigned int)X_packet_count - 1,
 	       (unsigned int)msg.Size());
+        if (message_detail >= Full_With_Dump_Detail) msg.Dump();
       };
 
       if (X_message_count > 0) {
