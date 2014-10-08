@@ -5,6 +5,11 @@
 #include "socket.h"
 
 const UINT32 MAX_MESSAGE_SIZE = 3000000;
+#ifdef __linux__
+const int RECV_FLAGS = 0;
+#else
+const int RECV_FLAGS = 0;
+#endif
 class Message;
 
 inline void ResetByteOrder();
@@ -29,6 +34,7 @@ public:
   void Dump(FILE *f = stdout, int columns = 40) const;
 
   int Receive(Socket const &s);
+  int ExtendTo(Socket const &s, size_t requested_len);
   void Send(Socket const &s) const;
   UINT32 Size() const { return size; };
   UINT8 operator[](UINT32 index) const;
@@ -38,6 +44,7 @@ protected:
   static UINT32 object_count;
 #endif
   UINT8 *data;
+  UINT8 *pos;
   UINT32 size;
   UINT32 max_size;
   int size_lock;

@@ -134,7 +134,8 @@ int Message::Receive(Socket const &from) {
 //	 data,
 //	 (unsigned int)max_size);
 
-  size = recv(from.Handle(), (char *)data, max_size, 0);
+  pos = data;
+  size = recv(from.Handle(), (char *)data, max_size, RECV_FLAGS);
   if (size == -1u) {
     if (errno == ECONNRESET) {
       return -1;
@@ -148,9 +149,49 @@ int Message::Receive(Socket const &from) {
 	    (unsigned int)max_size);
     terminate();
   };
+  // fprintf(stderr, "Received %d bytes into buffer %p\n", (int) size, data);
+  /* Is more deta available? */
+  // fprintf(stderr, "More data is%s available\n", 
+  // 	(recv(from.Handle(), NULL, 0, MSG_DONTWAIT) == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
+  //	? " not" : "");
+  pos = data + size;
   return 0;
 };
-  
+
+int Message::ExtendTo(Socket const &from, size_t extended_len) {
+
+//  printf("from.Handle() = %u, &from = %p, data = %p, max_size = %u\n",
+//	 (unsigned int)from.Handle(),
+//	 &from,
+//	 data,
+//	 (unsigned int)max_size);
+
+  while (size < extended_len) {
+    int this_size = recv(from.Handle(), (char *)pos, max_size - (pos - data), RECV_FLAGS);
+    if (size == -1u) {
+      if (errno == ECONNRESET) {
+	return -1;
+      };
+      fprintf(stderr, "Error %i on recv()\n", errno);
+      terminate();
+    };
+    size += this_size;
+    if (this_size >= (int) max_size - (pos - data) - 2) {
+      fprintf(stderr, "Message buffer overflow, size = %u, max_size = %u\n",
+	      (unsigned int)size,
+	      (unsigned int)max_size);
+      terminate();
+    };
+    // fprintf(stderr, "Received %d bytes into buffer %p\n", (int) this_size, data);
+    /* Is more deta available? */
+    // fprintf(stderr, "More data is%s available\n", 
+    //	  (recv(from.Handle(), NULL, 0, MSG_DONTWAIT) == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
+    //	  ? " not" : "");
+    pos += this_size;
+  }
+  return 0;
+};
+
 void Message::Send(Socket const &to) const {
 
   if (send(to.Handle(), data, size, 0) == -1) {

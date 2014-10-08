@@ -573,7 +573,7 @@ UINT32 ClientSubLength(Message const &msg, UINT32 index) {
   return size;
 };
 
-UINT32 XSubLength(Message const &msg, UINT32 index) {
+UINT32 XSubLength(Message &msg, UINT32 index) {
   UINT32 size;
   UINT32 min_size;
 
@@ -594,12 +594,15 @@ UINT32 XSubLength(Message const &msg, UINT32 index) {
     size = 32;
     min_size = 32;
   };
+  if (msg.Size() < size) {
+    msg.ExtendTo(*X, size);
+  }
   
   if (size < min_size) {
     fprintf(stderr, "Size of message from X is definitely too small\n");
     size = min_size;
   };
-  return size;
+  return msg.Size();
 };
 
 void syntax() {
@@ -1102,10 +1105,10 @@ int main(int argc, char *argv[]) {
 	      if ((msg[index] == 'B' || msg[index] == 'l')
 		  && PROG_message_count == 0 && index == 0) {
 		// This is a Connection Setup message
-	      printf("PROG_message_count = %u\n",
+		printf("PROG_message_count = %u\n",
 		     (unsigned int)PROG_message_count);
 		SetByteOrder(msg[index]);
-	      reset_flag = 1;
+		reset_flag = 1;
 	      };
 	      size = ClientSubLength(msg, index);
 	      if (size == 0) {
